@@ -1,87 +1,128 @@
-import { Request, Response } from 'express'
-import prisma from '../config/db'
+import { NextFunction, Request, Response } from "express";
+import prisma from "../db/prismaClient";
+import {
+    GenericAppError,
+    NotAuthenticatedError,
+    NotFoundError,
+} from "../errors/custom.errors";
 
-export const uploadFile = async (req: Request & { userId?: string, file?: Express.Multer.File }, res: Response) => {
+type TAuthenticatedRequest = Request & {
+    userId?: string;
+};
+
+export const uploadFile = async (
+    req: TAuthenticatedRequest & {
+        file?: Express.Multer.File;
+    },
+    res: Response,
+    next: NextFunction
+) => {
     try {
-        if (!req.file || !req.userId) {
-            res.status(400).json({ error: 'No file uploaded or user not authenticated' })
-            return
+        const { file: reqFile, userId } = req;
+        if (!reqFile || !userId) {
+            throw new GenericAppError(
+                "No file uploaded or user not authenticated",
+                400
+            );
         }
 
         const file = await prisma.file.create({
             data: {
-                filename: req.file.originalname,
-                path: req.file.path,
-                mimetype: req.file.mimetype,
-                size: req.file.size,
-                userId: parseInt(req.userId)
-            }
-        })
-
-        res.status(201).json(file)
-    } catch (error) {
-        res.status(500).json({ error: 'Error uploading file' })
+                filename: reqFile.originalname,
+                path: reqFile.path,
+                mimetype: reqFile.mimetype,
+                size: reqFile.size,
+                user_id: parseInt(userId),
+                class_id: parseInt(req.body.class_id),
+            },
+        });
+        res.status(201).json({
+            status: 201,
+            message: "File uploaded successfully",
+            data: file,
+        });
+    } catch (err) {
+        next(err);
     }
-}
+};
 
-export const listFiles = async (req: Request & { userId?: string }, res: Response) => {
+export const listFiles = async (
+    req: TAuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+) => {
     try {
+        const { userId } = req;
+        const { class_id } = req.body;
+        if (!sendResponseOnUnauthorized(userId)) return;
         const files = await prisma.file.findMany({
             where: {
-                userId: parseInt(req.userId!)
-            }
-        })
-
-        res.status(200).json(files)
-    } catch (error) {
-        res.status(500).json({ error: 'Error fetching files' })
+                user_id: parseInt(userId!),
+                class_id: class_id ? parseInt(class_id) : undefined,
+            },
+        });
+        res.status(200).json(files);
+    } catch (err) {
+        next(err);
     }
-}
+};
 
-export const deleteFile = async (req: Request & { userId?: string }, res: Response) => {
+export const deleteFile = async (
+    req: TAuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+) => {
     try {
+        const { userId } = req;
+        if (!sendResponseOnUnauthorized(userId)) return;
         const file = await prisma.file.findFirst({
             where: {
                 filename: req.params.filename,
-                userId: parseInt(req.userId!)
-            }
-        })
-
+                user_id: parseInt(userId),
+            },
+        });
         if (!file) {
-            res.status(404).json({ error: 'File not found' })
-            return
+            throw new NotFoundError("File not found");
         }
-
         await prisma.file.delete({
             where: {
-                id: file.id
-            }
-        })
-
-        res.status(200).json({ message: 'File deleted successfully' })
-    } catch (error) {
-        res.status(500).json({ error: 'Error deleting file' })
+                id: file.id,
+                class_id: req.body.class_id,
+            },
+        });
+        res.status(200).json({ message: "File deleted successfully" });
+    } catch (err) {
+        next(err);
     }
-}
+};
 
-export const getFile = async (req: Request, res: Response) => {
+export const getFile = async (
+    req: TAuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+) => {
     try {
-        const { userId, filename } = req.params;
-
+        const { filename } = req.params;
+        const { userId } = req;
+        if (!sendResponseOnUnauthorized(userId)) return;
         const file = await prisma.file.findFirst({
             where: {
                 filename: filename,
-                userId: parseInt(userId)
-            }
+                user_id: parseInt(userId),
+            },
         });
-
         if (!file) {
-            res.status(404).json({ error: 'File not found' });
-            return;
+            throw new NotFoundError("File not found");
         }
-
-        res.sendFile(file.path, { root: './' });
-    } catch (error) {
-        res.status(500).json({ error: 'Error retrieving file' });
+        res.sendFile(file.path, { root: "./" });
+    } catch (err) {
+        next(err);
     }
 };
+
+function sendResponseOnUnauthorized(userId?: string): userId is string {
+    if (!userId) {
+        throw new NotAuthenticatedError("User not authenticated");
+    }
+    return typeof userId === "string";
+}
