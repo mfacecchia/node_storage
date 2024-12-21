@@ -39,7 +39,7 @@ export class DatabaseQueryError extends AppError {
     constructor(message: string) {
         super(message);
         this.name = "DatabaseQueryError";
-        this.statusCode = 500;
+        this.statusCode = 400;
     }
 }
 
