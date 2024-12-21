@@ -39,7 +39,10 @@ export const uploadFile = async (
         res.status(201).json({
             status: 201,
             message: "File uploaded successfully",
-            data: file,
+            data: {
+                ...file,
+                id: file.id.toString(),
+            },
         });
     } catch (err) {
         next(err);
