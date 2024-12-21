@@ -1,6 +1,7 @@
+import { PrismaClientInitializationError } from "@prisma/client/runtime/library";
 import "dotenv/config";
 import { NextFunction, Request, Response } from "express";
-import AppError from "./custom.errors";
+import AppError, { DatabaseConnectionError } from "./custom.errors";
 
 export async function errorHandler(
     err: Error,
@@ -9,6 +10,9 @@ export async function errorHandler(
     next: NextFunction
 ) {
     logError(err);
+    if (err instanceof PrismaClientInitializationError) {
+        err = new DatabaseConnectionError("Failed connection to database");
+    }
     if (!(err instanceof AppError)) {
         res.status(500).json({
             status: 500,
