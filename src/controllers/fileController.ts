@@ -75,9 +75,11 @@ export const deleteFile = async (
 ) => {
     try {
         const { userId } = req;
+        const { filename } = req.query;
+        if (!filename) throw new GenericAppError("Filename not provided", 400);
         if (!sendResponseOnUnauthorized(userId)) return;
         const file = await fileDao.findFileByFilenameAndUserId(
-            req.params.filename,
+            filename.toString(),
             parseInt(userId)
         );
         if (!file) {
@@ -96,13 +98,14 @@ export const getFile = async (
     next: NextFunction
 ) => {
     try {
-        const { filename, user_id: userId } = req.params;
+        const { userId } = req.params;
+        const { filename } = req.query;
         if (!filename || !userId) {
-            throw new GenericAppError("File name or user not provided", 400);
+            throw new GenericAppError("Filename or user not provided", 400);
         }
         if (!sendResponseOnUnauthorized(userId)) return;
         const file = await fileDao.findFileByFilenameAndUserId(
-            filename,
+            filename.toString(),
             parseInt(userId)
         );
         if (!file) {
