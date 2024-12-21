@@ -97,13 +97,15 @@ export const deleteFile = async (
 };
 
 export const getFile = async (
-    req: TAuthenticatedRequest,
+    req: Request,
     res: Response,
     next: NextFunction
 ) => {
     try {
-        const { filename } = req.params;
-        const { userId } = req;
+        const { filename, user_id: userId } = req.params;
+        if (!filename || !userId) {
+            throw new GenericAppError("File name or user not provided", 400);
+        }
         if (!sendResponseOnUnauthorized(userId)) return;
         const file = await prisma.file.findFirst({
             where: {
