@@ -1,4 +1,5 @@
 import { createClient, RedisClientType } from "redis";
+import { RedisConnectionError } from "../errors/custom.errors";
 
 export class RedisClient {
     private connectionUrl = process.env.REDIS_CONNECTION_STRING;
@@ -40,7 +41,9 @@ export class RedisClient {
             .on("error", (err) => {
                 if (err.code === "ECONNREFUSED") {
                     if (this.hasReachedMaxRetries())
-                        throw new Error("Too many connection attempts.");
+                        throw new RedisConnectionError(
+                            "Too many connection attempts."
+                        );
                 }
             })
             .on("end", () => {})
