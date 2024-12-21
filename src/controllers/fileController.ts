@@ -56,13 +56,20 @@ export const listFiles = async (
 ) => {
     try {
         const { userId } = req;
-        const { class_id } = req.body;
+        const { class_id } = req.query;
         if (!sendResponseOnUnauthorized(userId)) return;
         const files = await fileDao.findFiles(
-            parseInt(userId!),
-            class_id ? parseInt(class_id) : undefined
+            parseInt(userId),
+            class_id ? parseInt(class_id.toString()) : undefined
         );
-        res.status(200).json(files);
+        res.status(200).json(
+            files.map((file) => {
+                return {
+                    ...file,
+                    id: file.id.toString(),
+                };
+            })
+        );
     } catch (err) {
         next(err);
     }
