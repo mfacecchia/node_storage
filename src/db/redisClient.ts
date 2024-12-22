@@ -27,7 +27,6 @@ export class RedisClient {
         if (this.client?.isReady) {
             return;
         }
-        this.currentReconnectionAttempts = 0;
 
         // TODO: Convert this to pooled connections client
         this.client = createClient({
@@ -35,26 +34,26 @@ export class RedisClient {
         });
 
         await this.client
-            .on("connect", async () => {
-                this.currentReconnectionAttempts = 0;
-            })
-            .on("error", (err) => {
-                if (err.code === "ECONNREFUSED") {
-                    if (this.hasReachedMaxRetries())
-                        throw new RedisConnectionError(
-                            "Too many connection attempts."
-                        );
-                }
-            })
+            .on("connect", async () => {})
+            .on("error", (err) => {})
             .on("end", () => {})
             .on("reconnecting", () => {
-                this.currentReconnectionAttempts += 1;
+                if (!this.hasReachedMaxRetries()) {
+                    this.currentReconnectionAttempts += 1;
+                    return;
+                }
+                this.currentReconnectionAttempts = 0;
+                this.client = null;
+                throw new RedisConnectionError(
+                    "Could not establish connection to Database"
+                );
             })
             .connect();
     }
 
     async getConnection() {
-        if (!this.client || this.client.isReady) await this.connect();
+        this.currentReconnectionAttempts = 0;
+        if (!this.client || !this.client.isReady) await this.connect();
         return this.client;
     }
 
