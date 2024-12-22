@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import {
     GenericAppError,
+    ImageNotAvailableError,
     NotAuthenticatedError,
 } from "../errors/custom.errors";
 import { FileServices } from "../services/fileServices";
@@ -97,10 +98,14 @@ export const getFile = async (
         }
         if (!sendResponseOnUnauthorized(userId)) return;
         const file = await fileServices.getSingleFile(
-            filename.toString(),
+            decodeURI(filename.toString()),
             parseInt(userId)
         );
-        res.sendFile(file.path, { root: "./" });
+        // Handling `no such file or directory` error
+        // (in case the image was not found in the specified dir)
+        res.sendFile(file.path, { root: "./" }, (err) => {
+            next(new ImageNotAvailableError("Image not available"));
+        });
     } catch (err) {
         next(err);
     }
