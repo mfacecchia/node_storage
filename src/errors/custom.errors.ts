@@ -82,3 +82,11 @@ export class FileUploadError extends AppError {
         this.statusCode = 400;
     }
 }
+
+export class ImageNotAvailableError extends AppError {
+    constructor(message: string) {
+        super(message);
+        this.name = "ImageNotAvailableError";
+        this.statusCode = 400;
+    }
+}
