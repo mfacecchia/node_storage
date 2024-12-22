@@ -42,11 +42,12 @@ export class FileDAO {
         });
     }
 
-    async deleteFileById(fileId: File["id"]) {
+    async deleteFileById(file_id: File["id"], user_id: File["user_id"]) {
         try {
             return await prisma.file.delete({
                 where: {
-                    id: fileId,
+                    id: file_id,
+                    user_id,
                 },
             });
         } catch (err) {
