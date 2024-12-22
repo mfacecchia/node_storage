@@ -31,5 +31,7 @@ export async function errorHandler(
  * @param {Error} err
  */
 export function logError(err: Error) {
-    if (process.env.NODE_ENV === "development") console.error(err);
+    if (process.env.NODE_ENV !== "development") return;
+    console.log("-------\n[ERROR]\n-------");
+    console.error(err);
 }
