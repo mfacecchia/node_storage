@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt, { JsonWebTokenError, JwtPayload } from "jsonwebtoken";
 import { RedisClient } from "../db/redisClient";
 import { DataFetchError, TokenValidationError } from "../errors/custom.errors";
 
@@ -13,9 +13,12 @@ export const authenticateToken = async (
     next: NextFunction
 ) => {
     try {
-        const { sessionId: token } = req.cookies;
-        if (!token)
-            throw new TokenValidationError("Authorization token not found");
+        const { authorization: authToken } = req.headers;
+        const token = authToken?.replace("Bearer ", "");
+        if (!authToken || !token)
+            throw new TokenValidationError(
+                "Authorization token not found or invalid value provided"
+            );
 
         const redisClient = await RedisClient.getInstance().getConnection();
         if (!redisClient) throw new DataFetchError("Could not fetch data.");
@@ -29,6 +32,10 @@ export const authenticateToken = async (
         req.userId = userId;
         next();
     } catch (err) {
+        if (err instanceof JsonWebTokenError) {
+            next(new TokenValidationError("Invalid authorization token"));
+            return;
+        }
         next(err);
     }
 };
