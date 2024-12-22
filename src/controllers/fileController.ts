@@ -54,7 +54,7 @@ export const listFiles = async (
         const { userId: user_id } = req;
         const { class_id } = req.query;
         if (!sendResponseOnUnauthorized(user_id)) return;
-        const files = fileServices.getFilesList(
+        const files = await fileServices.getFilesList(
             parseInt(user_id),
             class_id ? parseInt(class_id.toString()) : undefined
         );
