@@ -14,8 +14,8 @@ export async function errorHandler(
         err = new DatabaseConnectionError("Failed connection to database");
     }
     if (!(err instanceof AppError)) {
-        res.status(500).json({
-            status: 500,
+        res.status(400).json({
+            status: 400,
             message: "An unexpected error occurred. Please try again later.",
         });
         return;
