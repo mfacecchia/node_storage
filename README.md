@@ -1,5 +1,5 @@
 # Node Storage
-NodeJS-based files storage project
+NodeJS-based file storage project for the [EduHub](https://github.com/mfacecchia/eduhub) project.
 
 ## Table of Contents
 - [Requirements](#requirements)
@@ -32,9 +32,18 @@ Once prisma completed the database configuration, all you will have to do is run
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
 ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?&style=for-the-badge&logo=redis&logoColor=white)
 
+## Libraries References
+- [Prisma ORM](https://www.prisma.io/docs/getting-started/quickstart)
+- [Redis Client](https://redis.io/docs/latest/develop/clients/nodejs/)
+- [Express](https://expressjs.com/en/4x/api.html#express)
+- [JWT](https://www.npmjs.com/package/jsonwebtoken)
+- [Dotenv](https://www.npmjs.com/package/dotenv)
+- [Multer](https://github.com/expressjs/multer)
+
+
 ## Environmental Variables
 The env file provided in this project includes:
-- NODE_ENV, used as an application environment flag which represents the current state in which the application is running; the default value is `development` and enables errors logging for quick debugging. However, you may want this feature to be disabled while running in a production environment (strongly recommended), and to do so you just have to set the value to `production` to disable that feature.
+- `NODE_ENV`, used as an application environment flag which represents the current state in which the application is running; the default value is `development` and enables errors logging for quick debugging. However, you may want this feature to be disabled while running in a production environment (strongly recommended), and to do so you just have to set the value to `production` to disable that feature.
 - `PORT`, representing the port which the server will run on.
 - `DATABASE_URL` and `REDIS_CONNECTION_STRING`, which, as the same name suggests, are used by ORMs and other libraries as information about how to connect to each persistence.
 - `JWT_SECRET`, representing the secret which will be used to validate the received authentication token so it's important for this value to be exactly the same as the server's.
