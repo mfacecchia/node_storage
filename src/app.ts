@@ -14,6 +14,7 @@ app.use(
     })
 );
 
+app.set("x-powered-by", false);
 app.use(express.json());
 app.use("/api", fileRoutes);
 
