@@ -135,4 +135,5 @@ dist
 # IDEs
 .vscode
 
-uploads
+uploads/*
+!uploads/.gitkeep
