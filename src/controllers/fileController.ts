@@ -12,6 +12,7 @@ type TAuthenticatedRequest = Request & {
     userId?: string;
 };
 
+// TODO: Add support for links
 export const uploadFile = async (
     req: TAuthenticatedRequest & {
         file?: Express.Multer.File;
