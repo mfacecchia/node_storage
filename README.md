@@ -40,7 +40,6 @@ Once prisma completed the database configuration, all you will have to do is run
 - [Dotenv](https://www.npmjs.com/package/dotenv)
 - [Multer](https://github.com/expressjs/multer)
 
-
 ## Environmental Variables
 The env file provided in this project includes:
 - `NODE_ENV`, used as an application environment flag which represents the current state in which the application is running; the default value is `development` and enables errors logging for quick debugging. However, you may want this feature to be disabled while running in a production environment (strongly recommended), and to do so you just have to set the value to `production` to disable that feature.
@@ -48,3 +47,8 @@ The env file provided in this project includes:
 - `DATABASE_URL` and `REDIS_CONNECTION_STRING`, which, as the same name suggests, are used by ORMs and other libraries as information about how to connect to each persistence.
 - `JWT_SECRET`, representing the secret which will be used to validate the received authentication token so it's important for this value to be exactly the same as the server's.
 **Note:** once you are satisfied with the variables configuration, in order for the program to read those values you'll need to update the file name from `.env.sample` to just `.env`.
+
+## Features
+- File uploads
+- Files list retrieval with userId & classId filtering
+- Single file retrieval
